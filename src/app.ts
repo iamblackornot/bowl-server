@@ -40,6 +40,18 @@ class Application
 
         expressApp.options('*', cors());
         expressApp.use(cors());
+
+        expressApp.use(function(req, res, next) {
+
+            const origin = "localhost";
+          
+            res.header("Access-Control-Allow-Origin", origin);
+            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.header("Content-type", "application/json");
+          
+            next();
+          });
+
         expressApp.use(express.json());
         expressApp.use((req, res, next) => 
         {
