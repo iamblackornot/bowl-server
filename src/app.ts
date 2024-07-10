@@ -1,7 +1,9 @@
 import MockDataProvider from "./data/mock"
 import IDataProvider from "./data/dataprovider"
 import http from 'http';
+import https from 'https';
 import cors from 'cors';
+import fs from 'fs';
 
 import rootRoute from './routes/root';
 
@@ -33,23 +35,37 @@ class Application
         return true;
     }
 
+    private readSSLCertificates()
+    {
+        if(!process.env.SSL_KEY_PATH) { return false; }
+        if(!process.env.SSL_CERTIFICATE_PATH) { return false; }
+
+        if(!fs.existsSync(process.env.SSL_KEY_PATH)) { return false; }
+        if(!fs.existsSync(process.env.SSL_CERTIFICATE_PATH)) { return false; }
+
+        return {
+          key: fs.readFileSync(process.env.SSL_KEY_PATH),
+          cert: fs.readFileSync(process.env.SSL_CERTIFICATE_PATH),
+        };
+    }
+
     private initAPI()
     {
         const expressApp = express();
         const port = parseInt(process.env.PORT || '3111');
 
-        // expressApp.options('*', cors());
-        // expressApp.use(cors());
+        expressApp.options('*', cors());
+        expressApp.use(cors());
 
-        expressApp.use(function(req, res, next) {
+        // expressApp.use(function(req, res, next) {
 
-            const origin = (req.headers.origin || "*");
+        //     const origin = (req.headers.origin || "*");
           
-            res.header("Access-Control-Allow-Origin", origin);
-            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        //     res.header("Access-Control-Allow-Origin", origin);
+        //     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
           
-            next();
-          });
+        //     next();
+        //   });
 
         expressApp.use(express.json());
         expressApp.use((req, res, next) => 
@@ -64,10 +80,19 @@ class Application
         expressApp.use(playersGetRoute);
         expressApp.use(playerAddRoute);
 
-        http.createServer(expressApp).listen(port, () => 
-        {
-            console.log('http is listening at', port);
-        });
+        const ssl = this.readSSLCertificates();
+
+        if(ssl) {
+            https.createServer(ssl, expressApp).listen(port, () => 
+            {
+                console.log('https is listening at ', port);
+            });
+        } else {
+            http.createServer(expressApp).listen(port, () => 
+            {
+                console.log('http is listening at', port);
+            });
+        }
     }
 
     private initDataProvider()
