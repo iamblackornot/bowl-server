@@ -55,7 +55,15 @@ class Application
         const port = parseInt(process.env.PORT || '3111');
 
         expressApp.options('*', cors());
-        expressApp.use(cors());
+
+        const corsOptions = {
+            origin: ['https://localhost:5173', 'https://localhost', 'https://posterpresentations.ddns.net'],
+            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+            allowedHeaders: ['Content-Type', 'Authorization'],
+            credentials: true,
+        };
+
+        expressApp.use(cors(corsOptions));
 
         // expressApp.use(function(req, res, next) {
 
