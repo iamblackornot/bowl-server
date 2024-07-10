@@ -43,7 +43,7 @@ class Application
 
         expressApp.use(function(req, res, next) {
 
-            const origin = "localhost";
+            const origin = (req.headers.origin || "*");
           
             res.header("Access-Control-Allow-Origin", origin);
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
