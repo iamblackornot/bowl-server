@@ -39,7 +39,7 @@ class Application
         const port = parseInt(process.env.PORT || '3111');
 
         expressApp.use(cors({
-            origin: 'http://localhost',
+            origin: '*',
         }));
         expressApp.use(express.json());
         expressApp.use((req, res, next) => 
