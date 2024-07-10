@@ -1,0 +1,23 @@
+{
+  "name": "bowl-server",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "nodemon src/index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@types/node": "^20.14.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "http-status-codes": "^2.3.0",
+    "mysql2": "^3.10.0",
+    "nodemon": "^3.1.3"
+  }
+}
