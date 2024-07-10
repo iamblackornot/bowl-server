@@ -38,6 +38,7 @@ class Application
         const expressApp = express();
         const port = parseInt(process.env.PORT || '3111');
 
+        expressApp.options('*', cors());
         expressApp.use(cors());
         expressApp.use(express.json());
         expressApp.use((req, res, next) => 
