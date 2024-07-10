@@ -67,13 +67,13 @@ class Application
         //     next();
         //   });
 
+        // expressApp.use((req, res, next) => 
+        // {
+        //     res.header('Access-Control-Allow-Origin', '*');
+        //     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        //     next();
+        // });
         expressApp.use(express.json());
-        expressApp.use((req, res, next) => 
-        {
-            res.header('Access-Control-Allow-Origin', '*');
-            res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-            next();
-        });
 
         expressApp.use(rootRoute);
         expressApp.use(logRoute);
