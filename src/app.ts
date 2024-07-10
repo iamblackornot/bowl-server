@@ -38,8 +38,8 @@ class Application
         const expressApp = express();
         const port = parseInt(process.env.PORT || '3111');
 
-        expressApp.options('*', cors());
-        expressApp.use(cors());
+        // expressApp.options('*', cors());
+        // expressApp.use(cors());
 
         expressApp.use(function(req, res, next) {
 
@@ -47,7 +47,6 @@ class Application
           
             res.header("Access-Control-Allow-Origin", origin);
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-            res.header("Content-type", "application/json");
           
             next();
           });
