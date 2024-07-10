@@ -9,6 +9,7 @@ import express from "express";
 import playersGetRoute from './routes/players/get';
 import playerAddRoute from './routes/players/add';
 import MySQLDataProvider from './data/mysql';
+import { initLogger } from "../log";
 
 class Application
 {
@@ -65,6 +66,8 @@ class Application
 
     public async run()
     {
+        initLogger();
+
         if(!this.checkEnvVariables()) {
             console.log("ENV variables are missing");
             return;
@@ -75,13 +78,6 @@ class Application
         this.initDataProvider();
 
         console.log(process.env.MYSQL_USERNAME);
-
-        const testdb = new MySQLDataProvider(
-            process.env.MYSQL_ENDPOINT!,
-            process.env.MYSQL_USERNAME!,
-            process.env.MYSQL_PASS!, 
-            process.env.MYSQL_DBNAME!
-        );
     }
 }
 
