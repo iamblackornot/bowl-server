@@ -56,14 +56,15 @@ class Application
 
         expressApp.options('*', cors());
 
-        const corsOptions = {
-            origin: ['http://localhost:5173', 'https://localhost', 'https://posterpresentations.ddns.net'],
-            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-            allowedHeaders: ['Content-Type', 'Authorization'],
-            credentials: true,
-        };
+        // const corsOptions = {
+        //     origin: ['http://localhost:5173', 'https://localhost', 'https://posterpresentations.ddns.net', 'http://localhost'],
+        //     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        //     allowedHeaders: ['Content-Type', 'Authorization'],
+        //     credentials: true,
+        // };
 
-        expressApp.use(cors(corsOptions));
+        //expressApp.use(cors(corsOptions));
+        expressApp.use(cors());
 
         // expressApp.use(function(req, res, next) {
 
