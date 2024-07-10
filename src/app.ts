@@ -1,6 +1,7 @@
 import MockDataProvider from "./data/mock"
 import IDataProvider from "./data/dataprovider"
 import http from 'http';
+import cors from 'cors';
 
 import rootRoute from './routes/root';
 
@@ -10,6 +11,7 @@ import playersGetRoute from './routes/players/get';
 import playerAddRoute from './routes/players/add';
 import MySQLDataProvider from './data/mysql';
 import { initLogger } from "../log";
+import logRoute from "./routes/log";
 
 class Application
 {
@@ -36,6 +38,9 @@ class Application
         const expressApp = express();
         const port = parseInt(process.env.PORT || '3111');
 
+        expressApp.use(cors({
+            origin: 'http://localhost',
+        }));
         expressApp.use(express.json());
         expressApp.use((req, res, next) => 
         {
@@ -45,6 +50,7 @@ class Application
         });
 
         expressApp.use(rootRoute);
+        expressApp.use(logRoute);
         expressApp.use(playersGetRoute);
         expressApp.use(playerAddRoute);
 
