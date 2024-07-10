@@ -57,7 +57,7 @@ class Application
         expressApp.options('*', cors());
 
         const corsOptions = {
-            origin: ['https://localhost:5173', 'https://localhost', 'https://posterpresentations.ddns.net'],
+            origin: ['http://localhost:5173', 'https://localhost', 'https://posterpresentations.ddns.net'],
             methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
             allowedHeaders: ['Content-Type', 'Authorization'],
             credentials: true,
