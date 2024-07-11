@@ -54,34 +54,10 @@ class Application
         const expressApp = express();
         const port = parseInt(process.env.PORT || '3111');
 
-        expressApp.options('*', cors());
+        const allowedOrigin: string = process.env.CORS_ALLOWED_ORIGIN ?? "*";
 
-        // const corsOptions = {
-        //     origin: ['http://localhost:5173', 'https://localhost', 'https://posterpresentations.ddns.net', 'http://localhost'],
-        //     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-        //     allowedHeaders: ['Content-Type', 'Authorization'],
-        //     credentials: true,
-        // };
-
-        //expressApp.use(cors(corsOptions));
-        expressApp.use(cors());
-
-        // expressApp.use(function(req, res, next) {
-
-        //     const origin = (req.headers.origin || "*");
-          
-        //     res.header("Access-Control-Allow-Origin", origin);
-        //     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-          
-        //     next();
-        //   });
-
-        // expressApp.use((req, res, next) => 
-        // {
-        //     res.header('Access-Control-Allow-Origin', '*');
-        //     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        //     next();
-        // });
+        expressApp.options(allowedOrigin, cors());
+        expressApp.use(cors({origin: allowedOrigin}));
         expressApp.use(express.json());
 
         expressApp.use(rootRoute);
