@@ -17,7 +17,7 @@ playerAddRoute.post('/players/add', async (req, resp) =>
         return;
     }
 
-    const res = await app.database.addPlayer(params.name);
+    const res = await app.getDataProvider().addPlayer(params.name);
 
     if(!res.success) 
     {

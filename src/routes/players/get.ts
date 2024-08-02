@@ -5,7 +5,7 @@ const playersGetRoute: Router = express.Router();
 
 playersGetRoute.get('/players', async (req, resp) => 
 {
-    const res = await app.database.getPlayers();
+    const res = await app.getDataProvider().getPlayers();
 
     if(!res.success) 
     {

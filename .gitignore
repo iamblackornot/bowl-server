@@ -50,3 +50,5 @@ node_modules/
 
 # Ignore generated jest coverage directory
 coverage/
+
+*.sql

@@ -1,3 +1,4 @@
+import { ICreateGamePayload, IGame } from "../models/game";
 import IPlayer from "../models/player";
 import IDataProvider from "./dataprovider";
 import Result from "./result";
@@ -17,5 +18,12 @@ export default class MockDataProvider implements IDataProvider
         ];
         
         return Promise.resolve(new Result<IPlayer[]>(true, players));
+    }
+    createGame(params: ICreateGamePayload): Promise<Result<null>> {
+        return Promise.resolve(new Result(true));
+    }
+
+    getLiveGame(): Promise<Result<IGame>> {
+        return Promise.resolve(new Result(true));
     }
 }
