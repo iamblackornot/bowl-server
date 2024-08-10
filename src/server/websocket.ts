@@ -1,14 +1,13 @@
-
 import WebSocket from 'ws';
 import { Server } from './server';
 import { log } from '../../log';
 import IDataProvider from '../data/dataprovider';
-import { IGame, noGame } from '../models/game';
+import { IGame, IScorePayload, noGame } from '../models/game';
 
 enum MessageType {
     Error = 0,
     Game = 1,
-    Scores = 2,
+    Score = 2,
 }
 
 export default class WebSocketServer
@@ -32,12 +31,15 @@ export default class WebSocketServer
                 console.log('received: %s', JSON.parse(data.toString()));
             });
           
-            const res = await this.dataProvider.getLiveGame();
+            if(this.wss.clients.size > 0)
+            {
+                const res = await this.dataProvider.getLiveGame();
 
-            if(res.success) {
-                this.sendGame(ws, res.data ?? noGame);
-            } else {
-                this.sendError(ws, res.errorMessage);
+                if(res.success) {
+                    this.sendGame(ws, res.data ?? noGame);
+                } else {
+                    this.sendError(ws, res.errorMessage);
+                }
             }
         });
 
@@ -47,6 +49,13 @@ export default class WebSocketServer
     public broadcastGame(game: IGame) {
         for(const client of this.wss.clients) {
             this.sendGame(client, game);
+        }
+    }
+
+    public broadcastScore(score: IScorePayload) {
+        console.log("sent score", score);
+        for(const client of this.wss.clients) {
+            this.sendScore(client, score);
         }
     }
 
@@ -60,6 +69,15 @@ export default class WebSocketServer
         const message = {
             type: MessageType.Game,
             payload: game
+        }
+
+        ws.send(JSON.stringify(message));   
+    }
+
+    private sendScore(ws: WebSocket, score: IScorePayload) {
+        const message = {
+            type: MessageType.Score,
+            payload: score,
         }
 
         ws.send(JSON.stringify(message));   

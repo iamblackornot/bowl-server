@@ -2,7 +2,7 @@ import mysql, { PoolConnection, QueryResult, RowDataPacket } from 'mysql2/promis
 import Result from './result';
 import IDataProvider from './dataprovider';
 import IPlayer from '../models/player';
-import { ICreateGamePayload, IGame, noGame } from '../models/game';
+import { ICreateGamePayload, IGame, IScorePayload, noGame } from '../models/game';
 
 interface CountRow extends RowDataPacket {
     count: number;
@@ -12,6 +12,13 @@ interface TeamsRow extends RowDataPacket {
     team_index: number;
     id: number;
     name: string;
+}
+
+interface ScoresRow extends RowDataPacket {
+    game_id: number;
+    team_index: number;
+    end: number;
+    score: number;
 }
 
 export default class MySQLDataProvider implements IDataProvider {
@@ -31,6 +38,7 @@ export default class MySQLDataProvider implements IDataProvider {
             enableKeepAlive: true,
             keepAliveInitialDelay: 0,
             multipleStatements: true,
+            timezone: 'Z',
         });
     }
 
@@ -89,8 +97,8 @@ export default class MySQLDataProvider implements IDataProvider {
                 return new Result<null>(false, null, "live game is already running");
             }
             
-            res = await conn.query("INSERT INTO games (time_created, type, ends, bowls)" + 
-                                     "VALUES (NOW(), ?, ?, ?);", [ params.type, params.ends, params.bowls ]);
+            res = await conn.query("INSERT INTO games (created, type, ends, bowls)" + 
+                                     "VALUES (UTC_TIMESTAMP(), ?, ?, ?);", [ params.type, params.ends, params.bowls ]);
 
             if(!this.isResultSetHeader(res[0])) {
                 await this.abortConnection(conn);
@@ -165,20 +173,59 @@ export default class MySQLDataProvider implements IDataProvider {
             game.teams[row.team_index].push({ id: row.id, name: row.name });
         }
 
+        game.scores = this.createZeroScores(game.ends, game.teams.length);
+
+        res = await this.query("SELECT * FROM scores " + 
+            "WHERE game_id = ?", game.id);
+
+        if(!res.success) {
+            return new Result<IGame>(false, noGame, res.errorMessage);
+        }
+
+        const scoreEntries = (res.data as ScoresRow[]);
+
+        for(const entry of scoreEntries) {
+            game.scores[entry.team_index][entry.end] = entry.score;
+        }
+
         return new Result<IGame>(true, game);
+    }
+
+    public async updateScore(params: IScorePayload): Promise<Result<null>> {
+
+        if(params.value !== 0) {
+            const res = await this.query("INSERT INTO scores (game_id, team_index, end, score) VALUES (?, ?, ?, ?) " + 
+                                        "ON DUPLICATE KEY UPDATE score = ?;", 
+                                        [params.gameId, params.teamIndex, params.end, params.value, params.value]);
+
+            if(!res.success) {
+                return new Result(false, null, res.errorMessage);
+            }
+        }
+        else
+        {
+            await this.query("DELETE FROM scores WHERE game_id = ? AND team_index = ? AND end = ?",
+                            [params.gameId, params.teamIndex, params.end])
+        }
+
+        return new Result(true);
+    }
+
+    private createZeroScores(ends: number, teamCount: number): number[][] {
+        return Array(teamCount).fill([]).map(() => Array(ends + 1).fill(0));
     }
 
     private isResultSetHeader(obj: any): obj is mysql.ResultSetHeader {
         return 'affectedRows' in obj && 'insertId' in obj;
     }
 
-    private async query(sqlStatement: string, ...args: any): Promise<Result<QueryResult>> {
+    private async query(sqlStatement: string, args?: any): Promise<Result<QueryResult>> {
         const conn = await this.pool.getConnection();
         const res = this.query_conn(conn, sqlStatement, args);
         conn.release();
         return res;
     }
-    private async query_conn(conn: PoolConnection, sqlStatement: string, ...args: any): Promise<Result<QueryResult>> {
+    private async query_conn(conn: PoolConnection, sqlStatement: string, args: any): Promise<Result<QueryResult>> {
         try {
             const res = await conn.query(sqlStatement, args);
             return new Result<QueryResult>(true, res[0]);

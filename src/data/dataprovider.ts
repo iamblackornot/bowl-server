@@ -1,4 +1,4 @@
-import { ICreateGamePayload, IGame } from "../models/game";
+import { ICreateGamePayload, IGame, IScorePayload } from "../models/game";
 import IPlayer from "../models/player";
 import Result from "./result";
 
@@ -9,4 +9,5 @@ export default interface IDataProvider
     getPlayers() : Promise<Result<IPlayer[]>>
     createGame(params: ICreateGamePayload): Promise<Result<null>>
     getLiveGame(): Promise<Result<IGame>>
+    updateScore(params: IScorePayload): Promise<Result<null>>
 }

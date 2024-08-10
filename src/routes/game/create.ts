@@ -15,13 +15,23 @@ gameCreateRoute.post('/game/create', async (req, resp) =>
         return;
     }
 
-    const res = await app.getDataProvider().createGame(params);
+    const createRes = await app.getDataProvider().createGame(params);
 
-    if(!res.success) 
+    if(!createRes.success) 
     {
-        resp.status(httpStatus.INTERNAL_SERVER_ERROR).send(res.errorMessage);
+        resp.status(httpStatus.INTERNAL_SERVER_ERROR).send(createRes.errorMessage);
         return;
     }
+
+    const liveRes = await app.getDataProvider().getLiveGame();
+
+    if(!liveRes.success || !liveRes.data) 
+    {
+        resp.status(httpStatus.INTERNAL_SERVER_ERROR).send(liveRes.errorMessage);
+        return;
+    }
+
+    app.getWebsocketServer()?.broadcastGame(liveRes.data);
 
     resp.status(httpStatus.OK).send();
 });

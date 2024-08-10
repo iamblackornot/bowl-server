@@ -14,6 +14,12 @@ export interface ICreateGamePayload {
     bowls: number;
 }
 
+export type IScorePayload = {
+    gameId: number;
+    teamIndex: number;
+    end: number;
+    value: number;
+};
 export interface IGame {
     id: number;
     type: GameType;
@@ -21,6 +27,7 @@ export interface IGame {
     teams: IPlayer[][];
     ends: number;
     bowls: number;
+    scores: number[][];
 }
 
 export const noGame: IGame = {
@@ -30,4 +37,5 @@ export const noGame: IGame = {
     teams: [],
     ends: 0,
     bowls: 0,
+    scores: [],
 } 

@@ -79,10 +79,6 @@ class Application
         this.websocket = new WebSocketServer(server, this.database);
 
         console.log(process.env.MYSQL_USERNAME);
-
-            await this.database.getLiveGame();
-        // const res = await this.database.createGame({ bowls: 4, type: GameType.Cutthroat, ends: 22, teams: [[7, 3], [6, 5]]});
-        // console.log(res.errorMessage);
     }
 }
 
