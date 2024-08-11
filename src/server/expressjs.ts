@@ -7,6 +7,7 @@ import playerAddRoute from '../routes/players/add';
 import gameCreateRoute from "../routes/game/create";
 import logRoute from "../routes/log";
 import gameScoreRoute from '../routes/game/score';
+import gameEndRoute from '../routes/game/end';
 
 export default class Express
 {
@@ -34,6 +35,7 @@ export default class Express
 
         this.expressApp.use(gameCreateRoute);
         this.expressApp.use(gameScoreRoute);
+        this.expressApp.use(gameEndRoute);
     }
 
     public instance = () => this.expressApp;

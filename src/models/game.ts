@@ -1,6 +1,7 @@
 import IPlayer from "./player";
 
 export enum GameType {
+    NoGame = -1,
     Cutthroat = 0,
     OneVsOne = 1,
     TwoVsTwo = 2,
@@ -32,7 +33,7 @@ export interface IGame {
 
 export const noGame: IGame = {
     id: -1,
-    type: 0,
+    type: GameType.NoGame,
     created: new Date(Date.now()),
     teams: [],
     ends: 0,

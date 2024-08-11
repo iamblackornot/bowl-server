@@ -53,7 +53,6 @@ export default class WebSocketServer
     }
 
     public broadcastScore(score: IScorePayload) {
-        console.log("sent score", score);
         for(const client of this.wss.clients) {
             this.sendScore(client, score);
         }

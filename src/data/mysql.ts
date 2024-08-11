@@ -3,6 +3,7 @@ import Result from './result';
 import IDataProvider from './dataprovider';
 import IPlayer from '../models/player';
 import { ICreateGamePayload, IGame, IScorePayload, noGame } from '../models/game';
+import { log } from '../../log';
 
 interface CountRow extends RowDataPacket {
     count: number;
@@ -206,6 +207,23 @@ export default class MySQLDataProvider implements IDataProvider {
         {
             await this.query("DELETE FROM scores WHERE game_id = ? AND team_index = ? AND end = ?",
                             [params.gameId, params.teamIndex, params.end])
+        }
+
+        return new Result(true);
+    }
+
+    public async endGame(id: number): Promise<Result<null>> {
+        {
+            const res = await this.query("DELETE FROM live WHERE game_id = ?", id);
+
+            if(!res.success) return new Result(false, null, "database error");
+            if(!this.isResultSetHeader(res.data)) return new Result<null>(false, null, "bad query");
+            if(res.data.affectedRows !== 1) return new Result<null>(false, null, "the game is not live");
+        }
+
+        {
+            const res = await this.query("UPDATE games SET ended = UTC_TIMESTAMP() WHERE id = ?", id);
+            if(!res.success) log("failed to update ended column");
         }
 
         return new Result(true);

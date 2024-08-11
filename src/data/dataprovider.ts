@@ -10,4 +10,5 @@ export default interface IDataProvider
     createGame(params: ICreateGamePayload): Promise<Result<null>>
     getLiveGame(): Promise<Result<IGame>>
     updateScore(params: IScorePayload): Promise<Result<null>>
+    endGame(id: number): Promise<Result<null>>
 }

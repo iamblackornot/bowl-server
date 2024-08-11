@@ -30,4 +30,8 @@ export default class MockDataProvider implements IDataProvider
     updateScore(params: IScorePayload): Promise<Result<null>> {
         return Promise.resolve(new Result(true));
     }
+
+    endGame(id: number): Promise<Result<null>> {
+        return Promise.resolve(new Result(true));
+    }
 }
