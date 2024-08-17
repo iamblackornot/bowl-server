@@ -1,5 +1,7 @@
+import { Footprint } from "../models/footprint";
 import { ICreateGamePayload, IGame, IScorePayload } from "../models/game";
 import IPlayer from "../models/player";
+import { IUser } from "../models/user";
 import IDataProvider from "./dataprovider";
 import Result from "./result";
 
@@ -32,6 +34,24 @@ export default class MockDataProvider implements IDataProvider
     }
 
     endGame(id: number): Promise<Result<null>> {
+        return Promise.resolve(new Result(true));
+    }
+
+    addUser(username: string, password: string): Promise<Result<number>> {
+        return Promise.resolve(new Result(true));
+    }
+
+    getUser(username: string): Promise<Result<IUser>> {
+        return Promise.resolve(new Result(true));
+    }
+
+    addTokenRecord(token: string, userId: number, footprint: Footprint): Promise<Result<null>> {
+        return Promise.resolve(new Result(true));
+    }
+    checkTokenRecord(token: string, userId: number): Promise<Result<null>> {
+        return Promise.resolve(new Result(true));
+    }
+    removeTokenRecord(token: string): Promise<Result<null>> {
         return Promise.resolve(new Result(true));
     }
 }

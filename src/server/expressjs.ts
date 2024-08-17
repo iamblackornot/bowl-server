@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from "express";
+import cookieParser from 'cookie-parser'
 
 import rootRoute from '../routes/root';
 import playersGetRoute from '../routes/players/get';
@@ -8,6 +9,10 @@ import gameCreateRoute from "../routes/game/create";
 import logRoute from "../routes/log";
 import gameScoreRoute from '../routes/game/score';
 import gameEndRoute from '../routes/game/end';
+import loginRoute from '../routes/auth/login';
+import validateRoute from '../routes/auth/validate';
+import logoutRoute from '../routes/auth/logout';
+import refreshRoute from '../routes/auth/refresh';
 
 export default class Express
 {
@@ -24,8 +29,9 @@ export default class Express
           : "*";
           
         console.log("allowed origin:", allowedOrigin);
-        this.expressApp.use(cors({origin: allowedOrigin}));
+        this.expressApp.use(cors({origin: allowedOrigin, credentials: true}));
         this.expressApp.use(express.json());
+        this.expressApp.use(cookieParser());
 
         this.expressApp.use(rootRoute);
         this.expressApp.use(logRoute);
@@ -36,6 +42,11 @@ export default class Express
         this.expressApp.use(gameCreateRoute);
         this.expressApp.use(gameScoreRoute);
         this.expressApp.use(gameEndRoute);
+
+        this.expressApp.use(loginRoute);
+        this.expressApp.use(logoutRoute);
+        this.expressApp.use(refreshRoute);
+        this.expressApp.use(validateRoute);
     }
 
     public instance = () => this.expressApp;

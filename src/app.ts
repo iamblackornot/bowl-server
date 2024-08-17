@@ -8,6 +8,7 @@ import { initLogger } from "../log";
 import Express from './server/expressjs';
 import { createServer } from './server/server';
 import WebSocketServer from './server/websocket';
+import AuthProvider from './auth/auth';
 
 export type SSLParams = false | {
     key: Buffer;
@@ -17,11 +18,13 @@ export type SSLParams = false | {
 class Application
 {
     private database: IDataProvider;
+    private auth: AuthProvider;
     private websocket?: WebSocketServer;
 
     constructor()
     {
         this.database = new MockDataProvider();
+        this.auth = new AuthProvider(this.database);
         dotenv.config();
     }
 
@@ -32,6 +35,9 @@ class Application
         if(!process.env.MYSQL_PASS)       { return false; }
         if(!process.env.MYSQL_DBNAME)     { return false; }
         if(!process.env.WS_PING_INTERVAL) { return false; }
+
+        if(!process.env.JWT_ACCESS_SECRET)  { return false; }
+        if(!process.env.JWT_REFRESH_SECRET) { return false; }
         
         return true;
     }
@@ -62,6 +68,7 @@ class Application
 
     public getDataProvider = () => this.database;
     public getWebsocketServer = () => this.websocket;
+    public getAuthProvider = () => this.auth;
 
     public async run()
     {
@@ -74,6 +81,8 @@ class Application
         }
 
         this.initDataProvider();
+        this.auth = new AuthProvider(this.database);
+
         const expressApp = new Express();
         const server = createServer(this.readSSLCertificates(), expressApp);
         this.websocket = new WebSocketServer(server, this.database);

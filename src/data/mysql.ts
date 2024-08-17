@@ -1,9 +1,11 @@
+import { Footprint } from './../models/footprint';
 import mysql, { PoolConnection, QueryResult, RowDataPacket } from 'mysql2/promise';
 import Result from './result';
 import IDataProvider from './dataprovider';
 import IPlayer from '../models/player';
 import { ICreateGamePayload, IGame, IScorePayload, noGame } from '../models/game';
 import { log } from '../../log';
+import { IUser, UserNotFound } from '../models/user';
 
 interface CountRow extends RowDataPacket {
     count: number;
@@ -225,6 +227,57 @@ export default class MySQLDataProvider implements IDataProvider {
             const res = await this.query("UPDATE games SET ended = UTC_TIMESTAMP() WHERE id = ?", id);
             if(!res.success) log("failed to update ended column");
         }
+
+        return new Result(true);
+    }
+
+    public async addUser(username: string, password: string): Promise<Result<number>> {
+        const res = await this.query("INSERT INTO users (username, password) VALUES(?, ?)", [username, password]);
+
+        if(!res.success) return new Result(false, -1, "database error");
+        if(!this.isResultSetHeader(res.data)) return new Result(false, -1, "bad query");
+        if(res.data.affectedRows !== 1) return new Result(false, -1, "failed to add user");
+
+        return new Result(true, res.data.insertId);
+    }
+
+    public async getUser(username: string): Promise<Result<IUser>> {
+        const res = await this.query("SELECT * FROM users WHERE username = ?", username);
+
+        if(!res.success) return new Result<IUser>(false, null, "database error");
+
+        const rows = res.data as IUser[];
+        if(rows.length == 0) return new Result<IUser>(true, UserNotFound);
+
+        return new Result(true, rows[0]);
+    }
+
+    public async addTokenRecord(token: string, userId: number, footprint: Footprint): Promise<Result<null>> {
+        const res = await this.query("INSERT INTO tokens (token, user_id, ip, user_agent) VALUES (?, ?, ?, ?) " + 
+                                     "ON DUPLICATE KEY UPDATE ip = ?, user_agent = ?",
+                                     [token, userId, footprint.ip, footprint.userAgent, footprint.ip, footprint.userAgent]);
+
+        if(!res.success) return new Result(false, null, "database error");
+        if(!this.isResultSetHeader(res.data)) return new Result(false, null, "bad query");
+        if(res.data.affectedRows !== 1) return new Result(false, null, "failed to add token record");
+
+        return new Result(true);
+    }
+
+    public async checkTokenRecord(token: string, userId: number): Promise<Result<null>> {
+        const res = await this.query("SELECT COUNT(*) as count FROM tokens WHERE token = ? AND user_id = ?", [token, userId]);
+
+        if(!res.success) return new Result(false, null, "database error");
+
+        const count = (res.data as CountRow[])[0].count;
+
+        return new Result(count !== 0);
+    }
+
+    public async removeTokenRecord(token: string): Promise<Result<null>> {
+        const res = await this.query("DELETE FROM tokens WHERE token = ?", token);
+
+        if(!res.success) return new Result(false, null, "database error");
 
         return new Result(true);
     }

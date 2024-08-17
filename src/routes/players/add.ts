@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import httpStatus from 'http-status-codes';
 import app from '../../app';
+import authMiddleware from '../../auth/middleware';
 
 interface AddPlayerParams {
     name: string
@@ -8,7 +9,7 @@ interface AddPlayerParams {
 
 const playerAddRoute: Router = express.Router();
 
-playerAddRoute.post('/players/add', async (req, resp) => 
+playerAddRoute.post('/players/add', authMiddleware, async (req, resp) => 
 {
     const params: AddPlayerParams = req.body;
 

@@ -1,9 +1,10 @@
 import express, { Router } from 'express';
 import app from '../../app';
+import authMiddleware from '../../auth/middleware';
 
 const playersGetRoute: Router = express.Router();
 
-playersGetRoute.get('/players', async (req, resp) => 
+playersGetRoute.get('/players', authMiddleware, async (req, resp) => 
 {
     const res = await app.getDataProvider().getPlayers();
 

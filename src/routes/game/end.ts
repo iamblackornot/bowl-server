@@ -2,10 +2,11 @@ import express, { Router } from 'express';
 import httpStatus from 'http-status-codes';
 import app from '../../app';
 import { noGame } from '../../models/game';
+import authMiddleware from '../../auth/middleware';
 
 const gameEndRoute: Router = express.Router();
 
-gameEndRoute.post('/game/end', async (req, resp) => 
+gameEndRoute.post('/game/end', authMiddleware, async (req, resp) => 
 {
     const { id } = req.body;
 

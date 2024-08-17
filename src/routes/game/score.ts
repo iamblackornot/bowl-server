@@ -2,10 +2,11 @@ import express, { Router } from 'express';
 import httpStatus from 'http-status-codes';
 import app from '../../app';
 import { IScorePayload } from '../../models/game';
+import authMiddleware from '../../auth/middleware';
 
 const gameScoreRoute: Router = express.Router();
 
-gameScoreRoute.post('/game/score', async (req, resp) => 
+gameScoreRoute.post('/game/score', authMiddleware, async (req, resp) => 
 {
     const params: IScorePayload = req.body;
 

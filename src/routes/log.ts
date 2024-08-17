@@ -11,6 +11,7 @@ const logRoute: Router = express.Router();
 logRoute.post('/log', async (req, resp) => 
 {
     const isLocalhost = req.ip === '127.0.0.1' || req.ip === '::1';
+    // console.log(req.ip);
 
     if(!isLocalhost) {
         resp.status(httpStatus.FORBIDDEN).send();

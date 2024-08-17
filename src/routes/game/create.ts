@@ -2,10 +2,11 @@ import express, { Router } from 'express';
 import httpStatus from 'http-status-codes';
 import app from '../../app';
 import { ICreateGamePayload } from '../../models/game';
+import authMiddleware from '../../auth/middleware';
 
 const gameCreateRoute: Router = express.Router();
 
-gameCreateRoute.post('/game/create', async (req, resp) => 
+gameCreateRoute.post('/game/create', authMiddleware, async (req, resp) => 
 {
     const params: ICreateGamePayload = req.body;
 
