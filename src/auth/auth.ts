@@ -80,7 +80,7 @@ export default class AuthProvider {
             const res = await jwtVerify(token, secret);
             return new Result(true, (res.payload as unknown) as TokenPayload);
         } catch(error: any) {
-            if(!error?.code || (error.code !== "ERR_JWT_EXPIRED" && error.code !== "ERR_JWT_INVALID")) {
+            if(!error?.code && (error.code !== "ERR_JWT_EXPIRED" || error.code !== "ERR_JWT_INVALID")) {
                 console.log(error);
             }
             return new Result(false);

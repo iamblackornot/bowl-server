@@ -40,3 +40,7 @@ export const noGame: IGame = {
     bowls: 0,
     scores: [],
 } 
+
+export interface ValidationSummary {
+    problems: string[];
+}

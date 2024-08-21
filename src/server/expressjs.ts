@@ -13,6 +13,7 @@ import loginRoute from '../routes/auth/login';
 import validateRoute from '../routes/auth/validate';
 import logoutRoute from '../routes/auth/logout';
 import refreshRoute from '../routes/auth/refresh';
+import gameValidateRoute from '../routes/game/validate';
 
 export default class Express
 {
@@ -42,6 +43,7 @@ export default class Express
         this.expressApp.use(gameCreateRoute);
         this.expressApp.use(gameScoreRoute);
         this.expressApp.use(gameEndRoute);
+        this.expressApp.use(gameValidateRoute);
 
         this.expressApp.use(loginRoute);
         this.expressApp.use(logoutRoute);

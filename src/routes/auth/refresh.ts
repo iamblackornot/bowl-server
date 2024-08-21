@@ -25,6 +25,7 @@ refreshRoute.post('/auth/refresh', async (req, resp) =>
     resp.cookie("refreshToken", res.data!.refresh, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
+        // sameSite: "lax"
     });
 
     resp.status(httpStatus.OK).json(res.data).send();

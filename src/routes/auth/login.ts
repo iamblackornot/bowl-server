@@ -33,7 +33,8 @@ loginRoute.post('/auth/login', async (req, resp) =>
     resp.cookie("refreshToken", res.data!.refresh, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: true,
+        // secure: true,
+        // sameSite: "lax"
     });
     
     resp.status(httpStatus.OK).send(res.data);
