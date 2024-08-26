@@ -1,3 +1,4 @@
+import { gameInfoByType, GameSummaryPayload, IGameSummary } from './../models/game';
 import { Footprint } from './../models/footprint';
 import mysql, { PoolConnection, QueryResult, RowDataPacket } from 'mysql2/promise';
 import Result from './result';
@@ -12,8 +13,9 @@ interface CountRow extends RowDataPacket {
 }
 
 interface TeamsRow extends RowDataPacket {
+    game_id: number;
+    player_id: number;
     team_index: number;
-    id: number;
     name: string;
 }
 
@@ -22,6 +24,12 @@ interface ScoresRow extends RowDataPacket {
     team_index: number;
     end: number;
     score: number;
+}
+
+interface TotalScoresRow extends RowDataPacket {
+    game_id: number;
+    team_index: number;
+    total_score: number;
 }
 
 export default class MySQLDataProvider implements IDataProvider {
@@ -157,7 +165,7 @@ export default class MySQLDataProvider implements IDataProvider {
             return new Result<IGame>(true, noGame, res.errorMessage);
         }
 
-        res = await this.query("SELECT teams.team_index, players.* FROM teams " + 
+        res = await this.query("SELECT teams.team_index, teams.player_id, players.name FROM teams " + 
                                "LEFT JOIN players ON teams.player_id = players.id " + 
                                "WHERE game_id = ? ORDER BY team_index", game.id);
 
@@ -173,7 +181,7 @@ export default class MySQLDataProvider implements IDataProvider {
                 game.teams.push([]);
             }
             
-            game.teams[row.team_index].push({ id: row.id, name: row.name });
+            game.teams[row.team_index].push({ id: row.player_id, name: row.name });
         }
 
         game.scores = this.createZeroScores(game.ends, game.teams.length);
@@ -193,6 +201,74 @@ export default class MySQLDataProvider implements IDataProvider {
 
         return new Result<IGame>(true, game);
     }
+
+    public async getGames(page: number, pageSize: number): Promise<Result<GameSummaryPayload>> {
+        const gamesRes = await this.query("SELECT * FROM games WHERE ended is NOT NULL ORDER BY ended DESC LIMIT ? OFFSET ?;",
+            [pageSize, (page - 1) * pageSize]);
+
+        if(!gamesRes.success) {
+            return new Result<GameSummaryPayload>(false, null, "database error");
+        }
+
+        const games = gamesRes.data as IGameSummary[];
+        const mappedGames = new Map<number, IGameSummary>(games.map((value: IGameSummary) => [value.id, value]));
+
+        const teamsRes = await this.query(
+            "SELECT teams.*, players.name FROM teams " + 
+            "LEFT JOIN players ON teams.player_id = players.id " + 
+            "WHERE teams.game_id IN (?) ORDER BY game_id, team_index", [Array.from(mappedGames.keys())]);
+
+        if(!teamsRes.success) {
+            return new Result<GameSummaryPayload>(false, null, "database error");
+        }
+
+        const teamRows = teamsRes.data as TeamsRow[];
+
+        for(const row of teamRows) {
+            const game = mappedGames.get(row.game_id);
+            if(!game) continue;
+
+            const teamCount = gameInfoByType.get(game.type)?.teamCount ?? 0;
+            if(!game.teams) game.teams = [...Array(teamCount)].map(() => new Array());
+
+            game.teams[row.team_index].push({ id: row.player_id, name: row.name });
+        }
+
+        const scoresRes = await this.query(
+            "SELECT game_id, team_index, SUM(score) as total_score " +
+            "FROM scores WHERE game_id IN (?) " + 
+            "GROUP BY game_id, team_index " + 
+            "ORDER BY game_id, team_index", 
+            [Array.from(mappedGames.keys())]);
+
+        if(!scoresRes.success) {
+            return new Result<GameSummaryPayload>(false, null, "database error");
+        }
+
+        const scores = scoresRes.data as TotalScoresRow[];
+
+        for(const game of games) {
+            const teamCount = gameInfoByType.get(game.type)?.teamCount ?? 0;
+            game.finalScores = new Array<number>(teamCount).fill(0);
+        }
+
+        for(const row of scores) {
+            const game = mappedGames.get(row.game_id);
+            if(!game) continue;
+
+            game.finalScores[row.team_index] = Number(row.total_score);
+        }
+
+        const totalGamesRes = await this.query("SELECT COUNT(*) as count FROM games WHERE ended is NOT NULL");
+
+        if(!totalGamesRes.success) {
+            return new Result<GameSummaryPayload>(false, null, "database error");
+        }
+
+        const totalGames = (totalGamesRes.data as CountRow[])[0].count;
+
+        return new Result(true, { games, page, totalGames });
+    } 
 
     public async updateScore(params: IScorePayload): Promise<Result<null>> {
 

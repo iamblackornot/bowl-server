@@ -1,5 +1,5 @@
 import { Footprint } from "../models/footprint";
-import { ICreateGamePayload, IGame, IScorePayload } from "../models/game";
+import { GameSummaryPayload, ICreateGamePayload, IGame, IScorePayload } from "../models/game";
 import IPlayer from "../models/player";
 import { IUser } from "../models/user";
 import IDataProvider from "./dataprovider";
@@ -26,6 +26,10 @@ export default class MockDataProvider implements IDataProvider
     }
 
     getLiveGame(): Promise<Result<IGame>> {
+        return Promise.resolve(new Result(true));
+    }
+
+    getGames(page: number, pageSize: number): Promise<Result<GameSummaryPayload>> {
         return Promise.resolve(new Result(true));
     }
 

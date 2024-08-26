@@ -14,6 +14,7 @@ import validateRoute from '../routes/auth/validate';
 import logoutRoute from '../routes/auth/logout';
 import refreshRoute from '../routes/auth/refresh';
 import gameValidateRoute from '../routes/game/validate';
+import gameHistoryRoute from '../routes/game/history';
 
 export default class Express
 {
@@ -23,11 +24,11 @@ export default class Express
     {
         this.expressApp = express();
 
-        const allowedOrigin: string = 
+        const allowedOrigin: string[] = 
             process.env.CORS_ALLOWED_ORIGIN 
          && process.env.CORS_ALLOWED_ORIGIN.length > 0 
-          ? process.env.CORS_ALLOWED_ORIGIN
-          : "*";
+          ? process.env.CORS_ALLOWED_ORIGIN.split(' ')
+          : [ "*" ];
           
         console.log("allowed origin:", allowedOrigin);
         this.expressApp.use(cors({origin: allowedOrigin, credentials: true}));
@@ -44,6 +45,7 @@ export default class Express
         this.expressApp.use(gameScoreRoute);
         this.expressApp.use(gameEndRoute);
         this.expressApp.use(gameValidateRoute);
+        this.expressApp.use(gameHistoryRoute);
 
         this.expressApp.use(loginRoute);
         this.expressApp.use(logoutRoute);

@@ -1,5 +1,5 @@
 import { Footprint } from "../models/footprint";
-import { ICreateGamePayload, IGame, IScorePayload } from "../models/game";
+import { GameSummaryPayload, ICreateGamePayload, IGame, IScorePayload } from "../models/game";
 import IPlayer from "../models/player";
 import { IUser } from "../models/user";
 import Result from "./result";
@@ -12,6 +12,7 @@ export default interface IDataProvider
 
     createGame(params: ICreateGamePayload): Promise<Result<null>>
     getLiveGame(): Promise<Result<IGame>>
+    getGames(page: number, pageSize: number): Promise<Result<GameSummaryPayload>> 
     updateScore(params: IScorePayload): Promise<Result<null>>
     endGame(id: number): Promise<Result<null>>
 
