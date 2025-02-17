@@ -30,6 +30,25 @@ server {
 }
 ```
 
+## Certificate
+
+make sure `bowl-server` restarts when `certbot` refreshes certificate
+
+```
+cd /etc/letsencrypt/renewal-hooks/deploy
+nano bowl-server-restart.sh
+chmod +x bowl-server-restart.sh 
+```
+
+[bowl-server-restart.sh]
+```
+pm2 restart bowl-server
+```
+
+> jinx is restarted by certbot by default
+
+## Misc
+
 `sudo nano /etc/nginx/sites-available/bowl-score`
 `sudo nano /etc/nginx/sites-enabled/bowl-score`
 
